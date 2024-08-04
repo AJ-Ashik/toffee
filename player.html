@@ -11,6 +11,7 @@
             color: white;
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
         }
 
         header {
@@ -21,6 +22,7 @@
 
         h1 {
             margin: 0;
+            font-size: 50px;
         }
 
         #joinButton {
@@ -30,34 +32,64 @@
             padding: 10px 20px;
             border-radius: 20px;
             margin-top: 10px;
+            cursor: pointer;
+            font-size: 1em;
         }
 
         .video-container {
             display: flex;
             justify-content: center;
             align-items: center;
-            height: 80vh;
+            padding: 20px;
+            height: calc(100vh - 120px); /* Adjust height based on header and button */
         }
 
         .video-container video {
-            width: 80%;
-            max-width: 800px;
+            width: 100%;
+            max-width: 100%;
+            height: auto;
             border-radius: 10px;
         }
 
-        .back-button {
-            display: flex;
-            justify-content: center;
-            margin-top: 20px;
+        /* Fullscreen Styles */
+        video:-webkit-full-screen {
+            width: 100%;
+            height: 100%;
         }
 
-        #backButton {
-            background-color: #4CAF50;
-            border: none;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 20px;
-            cursor: pointer;
+        video:-moz-full-screen {
+            width: 100%;
+            height: 100%;
+        }
+
+        video:-ms-fullscreen {
+            width: 100%;
+            height: 100%;
+        }
+
+        video:fullscreen {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Auto-rotate when in fullscreen */
+        video.fullscreen-rotate {
+            transform: rotate(90deg);
+            transform-origin: center;
+            width: 100vh;
+            height: 100vw;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            header h1 {
+                font-size: 1.2em;
+            }
+
+            #joinButton {
+                padding: 8px 16px;
+                font-size: 0.9em;
+            }
         }
     </style>
     <script>
@@ -65,21 +97,36 @@
             const urlParams = new URLSearchParams(window.location.search);
             const channelId = urlParams.get('channel');
             const videoElement = document.getElementById('videoPlayer');
+
             if (channelId) {
                 videoElement.src = `https://streamhubliveapi.vercel.app/api/${channelId}.m3u8`; // Replace with your actual video source
-            } else {
-                alert('No channel specified.');
             }
-        }
 
-        function goBack() {
-            window.history.back();
+            videoElement.addEventListener('fullscreenchange', () => {
+                if (document.fullscreenElement) {
+                    videoElement.classList.add('fullscreen-rotate');
+                } else {
+                    videoElement.classList.remove('fullscreen-rotate');
+                }
+            });
+
+            document.getElementById('joinButton').addEventListener('click', () => {
+                if (videoElement.requestFullscreen) {
+                    videoElement.requestFullscreen();
+                } else if (videoElement.mozRequestFullScreen) { // Firefox
+                    videoElement.mozRequestFullScreen();
+                } else if (videoElement.webkitRequestFullscreen) { // Chrome, Safari and Opera
+                    videoElement.webkitRequestFullscreen();
+                } else if (videoElement.msRequestFullscreen) { // IE/Edge
+                    videoElement.msRequestFullscreen();
+                }
+            });
         }
     </script>
 </head>
 <body>
     <header>
-        <h1>Channel Player</h1>
+        <h1>StreamHub Live</h1>
         <button id="joinButton">Join Our Telegram</button>
     </header>
 
@@ -89,8 +136,5 @@
         </video>
     </div>
 
-    <div class="back-button">
-        <button id="backButton" onclick="goBack()">Back</button>
-    </div>
 </body>
 </html>
